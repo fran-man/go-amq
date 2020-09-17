@@ -3,5 +3,5 @@ services:
   activemq:
     image: "rmohr/activemq:5.15.9"
     ports:
-      - "8161:8161"
-      - "61613:61613"
+      - "8161:8161" # GUI - go to localhost:8161 login is admin/admin
+      - "61613:61613" # STOMP
