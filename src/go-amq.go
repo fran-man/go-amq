@@ -7,7 +7,7 @@ import (
 	"github.com/go-stomp/stomp"
 )
 
-const testSendQ string = "test.queue.2"
+const testSendQ string = "test.queue.1"
 const textPlain string = "text/plain"
 
 func main() {

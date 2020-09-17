@@ -1,0 +1,7 @@
+version: "3"
+services:
+  activemq:
+    image: "rmohr/activemq:5.15.9"
+    ports:
+      - "8161:8161"
+      - "61613:61613"
