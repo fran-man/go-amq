@@ -2,30 +2,30 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 
-	"github.com/go-stomp/stomp"
+	"github.com/c-bata/go-prompt"
 )
 
-const testSendQ string = "test.queue.1"
-const textPlain string = "text/plain"
+const prodAction string = "Produce"
+const readAction string = "Consume"
 
 func main() {
-	con, er := stomp.Dial("tcp", "localhost:61613")
-	//defer con.Disconnect()
-	if er != nil {
-		fmt.Println("ERROR:", er)
-	} else {
-		fmt.Println("Connected successfully")
-	}
+	action := prompt.Input("Action>>>", rwCompleter)
 
-	for i := 0; i < 100; i++ {
-		er = con.Send(testSendQ, textPlain, []byte("Hello World "+strconv.Itoa(i)))
-		if er != nil {
-			fmt.Println("ERROR:", er)
-		} else {
-			fmt.Println("Sent Message")
-		}
+	switch action {
+	case prodAction:
+		produce()
+	case readAction:
+		consume()
+	default:
+		fmt.Println("ERROR: Invalid Action")
 	}
-	con.Disconnect()
+}
+
+func rwCompleter(d prompt.Document) []prompt.Suggest {
+	suggest := []prompt.Suggest{
+		{Text: prodAction, Description: "Send some messages"},
+		{Text: readAction, Description: "Read some messages"},
+	}
+	return prompt.FilterHasPrefix(suggest, d.GetWordBeforeCursor(), true)
 }
