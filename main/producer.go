@@ -11,6 +11,8 @@ var sendQueues = []string{"test.queue.1", "test.queue.2"}
 
 const textPlain string = "text/plain"
 
+var stompDial = stomp.Dial
+
 func produce() {
 	queue := prompt.Input("Queue to send to>>> ", qCompleter)
 	msg := getMsgFromCmd(queue)
@@ -40,7 +42,7 @@ func getMsgFromCmd(queue string) string {
 }
 
 func sendMsg(queue string, msg string) {
-	con, er := stomp.Dial("tcp", "localhost:61613")
+	con, er := stompDial("tcp", "localhost:61613")
 	defer con.Disconnect()
 	if er != nil {
 		fmt.Println("ERROR:", er)
