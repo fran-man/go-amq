@@ -10,7 +10,7 @@ const prodAction string = "Produce"
 const readAction string = "Consume"
 
 func main() {
-	action := prompt.Input("Action>>>", rwCompleter)
+	action := prompt.Input("Action>>> ", rwCompleter)
 
 	switch action {
 	case prodAction:
