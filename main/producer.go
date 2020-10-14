@@ -11,12 +11,16 @@ var sendQueues = []string{"test.queue.1", "test.queue.2"}
 
 const textPlain string = "text/plain"
 
-type amqConnection struct {
+type amqConnection interface {
+	sendMessage(string, string)
+}
+
+type amqConnectionImpl struct {
 	protocol string
 	address  string
 }
 
-func (amqConn *amqConnection) sendMessage(queue string, message string) {
+func (amqConn *amqConnectionImpl) sendMessage(queue string, message string) {
 	con, er := stomp.Dial(amqConn.protocol, amqConn.address)
 	defer con.Disconnect()
 	if er != nil {
@@ -27,13 +31,14 @@ func (amqConn *amqConnection) sendMessage(queue string, message string) {
 	er = con.Send(queue, textPlain, []byte(message))
 	if er != nil {
 		fmt.Println("ERROR:", er)
+		return
 	}
 }
 
 func produce() {
 	queue := prompt.Input("Queue to send to>>> ", qCompleter)
 	msg := getMsgFromCmd(queue)
-	amqConn := amqConnection{protocol: "tcp", address: "localhost:61613"}
+	amqConn := amqConnectionImpl{protocol: "tcp", address: "localhost:61613"}
 	sendMsg(queue, msg, &amqConn)
 }
 
@@ -59,7 +64,7 @@ func getMsgFromCmd(queue string) string {
 	return msg
 }
 
-func sendMsg(queue string, msg string, amqConn *amqConnection) {
+func sendMsg(queue string, msg string, amqConn amqConnection) {
 	amqConn.sendMessage(queue, msg)
 	fmt.Println("Message Sent")
 }
