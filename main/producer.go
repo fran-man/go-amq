@@ -11,12 +11,30 @@ var sendQueues = []string{"test.queue.1", "test.queue.2"}
 
 const textPlain string = "text/plain"
 
-var stompDial = stomp.Dial
+type amqConnection struct {
+	protocol string
+	address  string
+}
+
+func (amqConn *amqConnection) sendMessage(queue string, message string) {
+	con, er := stomp.Dial(amqConn.protocol, amqConn.address)
+	defer con.Disconnect()
+	if er != nil {
+		fmt.Println("ERROR:", er)
+		return
+	}
+
+	er = con.Send(queue, textPlain, []byte(message))
+	if er != nil {
+		fmt.Println("ERROR:", er)
+	}
+}
 
 func produce() {
 	queue := prompt.Input("Queue to send to>>> ", qCompleter)
 	msg := getMsgFromCmd(queue)
-	sendMsg(queue, msg)
+	amqConn := amqConnection{protocol: "tcp", address: "localhost:61613"}
+	sendMsg(queue, msg, &amqConn)
 }
 
 func qCompleter(d prompt.Document) []prompt.Suggest {
@@ -41,17 +59,7 @@ func getMsgFromCmd(queue string) string {
 	return msg
 }
 
-func sendMsg(queue string, msg string) {
-	con, er := stompDial("tcp", "localhost:61613")
-	defer con.Disconnect()
-	if er != nil {
-		fmt.Println("ERROR:", er)
-		return
-	}
-
-	er = con.Send(queue, textPlain, []byte(msg))
-	if er != nil {
-		fmt.Println("ERROR:", er)
-	}
+func sendMsg(queue string, msg string, amqConn *amqConnection) {
+	amqConn.sendMessage(queue, msg)
 	fmt.Println("Message Sent")
 }
