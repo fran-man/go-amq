@@ -10,13 +10,18 @@ const prodAction string = "Produce"
 const readAction string = "Consume"
 const exitAction string = "Exit"
 
+var realAutocomplete cmdAutocompleteImpl
+
 func main() {
+	amqConn = &amqConnectionImpl{protocol: "tcp", address: "localhost:61613"}
 	for {
 		action := prompt.Input("Action>>> ", rwCompleter)
 
+		realAutocomplete = cmdAutocompleteImpl{msgPrompt: "What is you message>>> ", queuePrompt: "Queue >>>"}
+
 		switch action {
 		case prodAction:
-			produce()
+			produce(&realAutocomplete)
 		case readAction:
 			consume()
 		case exitAction:

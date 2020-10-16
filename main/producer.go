@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	prompt "github.com/c-bata/go-prompt"
 	"github.com/go-stomp/stomp"
 )
 
@@ -35,33 +34,12 @@ func (amqConn *amqConnectionImpl) sendMessage(queue string, message string) {
 	}
 }
 
-func produce() {
-	queue := prompt.Input("Queue to send to>>> ", qCompleter)
-	msg := getMsgFromCmd(queue)
-	amqConn := amqConnectionImpl{protocol: "tcp", address: "localhost:61613"}
-	sendMsg(queue, msg, &amqConn)
-}
+var amqConn amqConnection
 
-func qCompleter(d prompt.Document) []prompt.Suggest {
-	suggest := make([]prompt.Suggest, len(sendQueues))
-	for i, q := range sendQueues {
-		suggest[i] = prompt.Suggest{Text: q, Description: "Send to queue " + q}
-	}
-	return prompt.FilterHasPrefix(suggest, d.GetWordBeforeCursor(), true)
-}
-
-func msgCompleter(d prompt.Document) []prompt.Suggest {
-	suggest := []prompt.Suggest{
-		{Text: "example", Description: "An example text/plain message"},
-	}
-	return prompt.FilterHasPrefix(suggest, d.GetWordBeforeCursor(), true)
-}
-
-func getMsgFromCmd(queue string) string {
-	fmt.Println("Sending to", queue)
-	msg := prompt.Input("What is your message?>>> ", msgCompleter)
-
-	return msg
+func produce(autocomplete cmdAutocomplete) {
+	queue := autocomplete.queueFromCmdLine()
+	msg := autocomplete.msgFromCmdLine()
+	sendMsg(queue, msg, amqConn)
 }
 
 func sendMsg(queue string, msg string, amqConn amqConnection) {
